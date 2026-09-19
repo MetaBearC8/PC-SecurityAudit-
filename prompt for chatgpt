@@ -1,0 +1,321 @@
+SecurityAudit 資訊安全自動檢查流程｜完整 Prompt 與操作規範
+====================================================
+
+一、整體目標
+-----------
+建立一套 Windows 主機資訊安全檢查流程：
+
+1. 以批次檔安裝／更新 SecurityAudit.ps1。
+2. 建立每日 08:00、20:00 自動排程。
+3. 執行 SecurityAudit.ps1 蒐集主機安全資訊。
+4. 將報告存放於 C:\SecurityAudit\YYYY-MM-DD。
+5. 自動同步至 Google Drive：SecurityAudit Reports\<ComputerName>\<YYYY-MM-DD>。
+6. ChatGPT 讀取最新報告。
+7. 與前一次報告比對。
+8. 判斷正常、需確認、高風險項目。
+9. 產出繁體中文濃縮版主管摘要。
+10. 持續每日循環比對，掌握變化。
+
+二、目前使用的主要檔案
+----------------------
+A. 主檢查腳本：C:\SecurityAudit\SecurityAudit.ps1
+B. 安裝／更新批次檔：Install-SecurityAudit-v3.bat
+   - 以系統管理員權限執行
+   - 複製 SecurityAudit.ps1 到 C:\SecurityAudit
+   - 建立每日 08:00、20:00 工作排程
+   - 安裝後立即執行一次掃描
+C. 手動執行＋開啟 ChatGPT：Run-SecurityAudit-and-ChatGPT-v2.bat
+   - 立即執行 SecurityAudit
+   - 開啟 ChatGPT
+   - 將分析 Prompt 放入剪貼簿
+
+三、SecurityAudit.ps1 檢查項目
+------------------------------
+01. Running Processes：程序、PID、Parent PID、路徑、Command Line
+02. CPU / Memory Usage：CPU、記憶體、程序路徑
+03. TCP Connections：Local/Remote IP、Port、State、PID、Process
+04. UDP Endpoints：UDP Port、PID、Process
+05. Windows Services：服務名稱、狀態、啟動模式、帳號、PID、路徑
+06. Scheduled Tasks：排程名稱、狀態、執行程式、Arguments
+07. Registry Startup：Run / RunOnce
+08. Startup Folder：使用者與全域 Startup
+09. Login Sessions：quser、LoggedOnUser
+10. Local Accounts：本機帳號、Guest、Administrator、最近登入
+11. Defender Status：即時防護、行為監控、防竄改、病毒碼、Exclusions
+12. Defender Threats：威脅偵測與處理紀錄
+13. Remote Control / VPN / Tunnel Tools：AnyDesk、TeamViewer、RustDesk、VPN 等
+14. Recent Executables / Scripts：近 7 天 EXE/DLL/PS1/BAT/CMD/VBS/JS
+15. PowerShell Profiles：Current User / All Users Profiles
+16. Suspicious Running Paths：Temp / Downloads / AppData Temp
+17. Boot / Shutdown / Crash Events：開關機、異常斷電、重啟
+18. Windows Logon Events：成功／失敗登入、特權登入、Session 事件
+19. RDP Local Session Events
+20. RDP Remote Connection Events
+21. New Service Installation Events：Event ID 7045
+22. Task Scheduler Events
+23. Defender Events
+24. PowerShell Events
+25. Account Creation / Group Events
+26. Local Administrators
+27. RDP Configuration：fDenyTSConnections、TermService
+28. Firewall Status：Domain / Private / Public
+29. Listening Ports：IP、Port、PID、Process
+30. Windows System Information：版本、Build、開機時間、主機、使用者
+31. Code Signatures / Certificates：Authenticode、Signer、Issuer、有效期、Thumbprint
+32. Enriched Network Activity：Process → Remote IP/Port → Signature
+
+四、Google Drive 同步規則
+------------------------
+根資料夾：SecurityAudit Reports
+Folder ID：1quUF1VgT3EzP10rwE1NRtx5gys_ShcLX
+
+資料夾結構：
+SecurityAudit Reports
+└─ <ComputerName>
+   └─ <YYYY-MM-DD>
+      ├─ 00_summary.txt
+      ├─ 01_processes.txt
+      ├─ ...
+      ├─ 31_code_signatures.txt
+      └─ 32_network_activity.txt
+
+規則：
+1. 每台電腦依 ComputerName 分資料夾。
+2. 每日依 YYYY-MM-DD 分資料夾。
+3. 同一天重跑時覆蓋同名報告。
+4. 只同步當日 SecurityAudit 報告檔案。
+5. 不複製 C:\ 根目錄或其他無關資料。
+
+五、ChatGPT 完整分析 Prompt
+-------------------------
+請立即檢查 Google Drive 資料夾「SecurityAudit Reports」
+（folder id: 1quUF1VgT3EzP10rwE1NRtx5gys_ShcLX）
+中這台電腦最新產生的 Windows SecurityAudit 報告。
+
+請執行以下分析：
+
+一、確認最新報告
+1. 先確認最新的「電腦名稱／日期」資料夾。
+2. 確認 00_summary.txt 的 Audit Time。
+3. 若沒有新的報告，請明確說明「目前沒有新報告」，不要用舊資料假裝今天狀況。
+
+二、與前一次報告比較
+請比對最新報告與前一份報告，特別找出：
+- 新增／消失的程序
+- 新服務
+- 新工作排程
+- Startup / Registry 變化
+- 新帳號
+- 新 Administrators 成員
+- Guest 是否啟用
+- RDP 是否開啟
+- 新 RDP Session / Remote Session
+- Defender 狀態變化
+- Defender Exclusions 變化
+- 新 Defender Threat
+- 新遠端控制工具
+- VPN / Tunnel 工具變化
+- Listening Port 新增／消失
+- 外部 TCP 連線變化
+- PowerShell 外連
+- AppData / Temp / Downloads 執行程式
+- 新增未簽章程式
+- Invalid / Unknown Authenticode Signature
+- 新的程式 → 遠端 IP 組合
+
+三、程式數位簽章分析
+請優先分析 31_code_signatures.txt。
+對每個非 Valid 項目分類：
+- NotSigned
+- UnknownError
+- HashMismatch
+- NotTrusted
+- 憑證過期
+- WindowsApps / App execution alias 權限造成的讀取失敗
+- 其他異常
+
+對可疑項目列出：
+- FilePath
+- Signature Status
+- Signer
+- Issuer
+- 是否正在執行
+- 是否有外部網路連線
+- 是否位於 Temp / AppData / Downloads
+- 初步風險判斷
+
+注意：憑證已過期不等於檔案一定惡意；應同時看驗證結果、時間戳、路徑、發行者與實際外連。
+
+四、網路活動分析
+請分析 03_tcp_connections.txt、29_listening_ports.txt、32_network_activity.txt。
+優先標示：
+- 未簽章程式 → 外部 IP
+- PowerShell / cmd / wscript / python → 外部 IP
+- Temp / AppData / Downloads 程式 → 外部 IP
+- 遠端控制工具 → 外部 IP
+- 新出現的 ExternalOrUnknown 連線
+- 非常用 Port
+- 新 Listening Port
+- 0.0.0.0 對外監聽服務
+- 未知程序與未知 IP 的組合
+
+對已知正常程式，例如 Microsoft、Google Chrome、Google Drive、Steam、NordVPN、FortiClient、Windows System Services，如數位簽章有效且行為符合正常用途，可列為正常／低風險，不要過度警示。
+TimeWait、PID 0 或已結束連線，應與目前 Established 連線區分，不可直接視為惡意程序。
+
+五、Defender
+檢查：
+- AntivirusEnabled
+- RealTimeProtectionEnabled
+- BehaviorMonitorEnabled
+- IsTamperProtected
+- DefenderSignaturesOutOfDate
+- ExclusionPath
+- ExclusionProcess
+- ExclusionExtension
+- Defender Threats
+- Quick Scan / Full Scan
+
+若舊 Threat 與前次完全相同，請標示為「歷史紀錄，非本次新增」。
+
+六、帳號與遠端登入
+檢查：
+- Guest
+- Administrator
+- Local Administrators
+- Local Users
+- quser
+- RDP configuration
+- RDP events
+- RDP connection events
+- Logon events
+
+高風險條件：
+- Guest 突然 Enabled
+- 新未知 Administrator
+- RDP 從關閉變開啟
+- 未知來源 IP RDP Login
+- 新 RemoteInteractive Session
+- 異常大量失敗登入
+
+七、服務與排程
+對 Event ID 7045 新服務：
+1. 找服務名稱。
+2. 找執行檔／ServiceDll。
+3. 判斷路徑。
+4. 檢查簽章。
+5. 比對是否 Windows / Microsoft 元件。
+6. 如為 Windows 更新服務，不要直接判斷為惡意。
+
+對新增 Scheduled Task：
+- 檢查執行檔
+- Arguments
+- 路徑
+- 簽章
+- 是否位於 Temp / AppData
+- 是否包含 PowerShell encoded command
+
+八、風險分級
+A. 正常
+- 沒有新遠端 Session
+- Defender 正常
+- Guest Disabled
+- RDP Disabled
+- 已知廠商有效簽章
+- 正常 HTTPS 連線
+- 正常 Windows / 軟體更新
+
+B. 需要確認
+- 新服務
+- 新排程
+- 新外部 IP
+- 未簽章第三方程式
+- 新 VPN / Tunnel
+- PowerShell 外連
+- 新監聽 Port
+- 憑證驗證異常
+
+C. 高風險
+- Defender 被關閉
+- Guest 被啟用
+- 新未知管理員
+- 未知 RDP Session
+- 未簽章程式從 Temp/AppData 對外連線
+- 新遠端控制工具
+- 可疑 PowerShell / encoded command
+- HashMismatch / NotTrusted 且同時有網路活動
+- 不明服務自動啟動並對外連線
+
+六、ChatGPT 輸出格式
+------------------
+請用繁體中文輸出，採「濃縮版主管報告」。
+
+SecurityAudit 安全檢查報告
+日期：
+電腦：
+
+【整體判斷】
+用 1～3 句說明目前是否有明確入侵跡象。
+
+【高風險】
+只列真正需要立即處理的項目；沒有就寫「目前未發現」。
+
+【需要確認】
+列出新服務、新外連、未簽章程式、憑證異常等。
+
+【正常】
+列出 Defender、RDP、Guest、Administrators、遠端工具、Firewall 等重要項目。
+
+【與前次差異】
+只列有意義的變化，不列單純 PID 改變等雜訊。
+
+【建議處理順序】
+1.
+2.
+3.
+
+最後以一句話總結目前安全狀況。
+
+七、極濃縮版 Prompt
+------------------
+請檢查 Google Drive「SecurityAudit Reports」中此電腦最新的 Windows SecurityAudit 報告，並與前一份報告比較。優先分析：新遠端 Session、新管理員、Guest、RDP、Defender、Defender Exclusions、遠端控制工具、新服務、新排程、Startup、可疑程序、Listening Ports、外部 TCP 連線、PowerShell 外連、未簽章／異常簽章程式，以及「未簽章程式＋外部連線」組合。請區分正常、需要確認、高風險，忽略單純 PID 變化及 TimeWait 等雜訊，最後以繁體中文輸出「整體判斷／高風險／需要確認／正常／與前次差異／建議處理順序」濃縮報告。若沒有新報告，請明確說明，不要臆測。
+
+八、整體流程
+-----------
+批次檔安裝
+↓
+SecurityAudit.ps1
+↓
+Windows 排程每日 08:00／20:00
+↓
+執行 00～32 項安全檢查
+↓
+C:\SecurityAudit\日期
+↓
+Google Drive
+SecurityAudit Reports\電腦名稱\日期
+↓
+ChatGPT 讀取最新報告
+↓
+與前次報告差異比對
+↓
+風險判讀
+├─ 正常
+├─ 需要確認
+└─ 高風險
+↓
+人工確認／處置
+↓
+隔日重新掃描與比對
+
+九、運作原則
+-----------
+1. SecurityAudit 原則上為 Read Only。
+2. 自動檢查不直接刪除檔案。
+3. 不自動停止程序。
+4. 不自動停用服務。
+5. 不自動修改 Registry。
+6. 不自動修改 Firewall。
+7. 不自動修改帳號或 Defender 設定。
+8. ChatGPT 負責分析與風險分級。
+9. 真正的隔離、停用、刪除、變更密碼等處置，由人員確認後再執行。
+10. 每次判讀都以「最新報告＋前次報告」做差異分析，避免只看單次快照。
