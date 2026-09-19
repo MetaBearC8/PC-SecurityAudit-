@@ -1,5 +1,10 @@
 Automated Information Security Inspection and Analysis Workflow
 
+Prerequisite: Install Google Drive for Desktop on the computer
+The computer must first have Google Drive for Desktop installed and signed in to an account that has access to the SecurityAudit Reports folder. This allows the security reports to be automatically synchronized to Google Drive.
+
+↓
+
 1. Batch File Installation / Update
 ↓
 2. Deploy SecurityAudit.ps1
@@ -24,14 +29,10 @@ SecurityAudit Reports\ComputerName\Date
 Processes / Accounts / RDP / Defender / Services / Scheduled Tasks / External Connections / Listening Ports / Digital Signatures
 ↓
 10. Risk Classification
-🟢 Normal ｜ 🟡 Requires Review ｜ 🔴 High Risk
+Normal ｜ Requires Review ｜ High Risk
 ↓
 11. Generate a Management Summary Report
 ↓
 12. Manual Verification and Necessary Remediation
 ↓
 13. Repeat the Scheduled Scan and Continue Comparison
-
-Condensed version:
-
-Automated Scan → Report Generation → Cloud Sync → AI Difference Analysis → Risk Classification → Manual Remediation → Continuous Monitoring
