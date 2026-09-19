@@ -16,9 +16,9 @@ The computer must first have Google Drive for Desktop installed and signed in to
 
 6.Example: G:\My Drive\SecurityAudit Reports
 
-7.Run the installer: Install-SecurityAudit-v4.2.bat
+7.Run the installer: "Install-SecurityAudit-v4.2.bat"
 
-8.Main program: SecurityAudit.ps1
+8.Main program(put both files in the same directory): "SecurityAudit.ps1"
 
 9.Local report storage location: C:\SecurityAudit\Date
 
