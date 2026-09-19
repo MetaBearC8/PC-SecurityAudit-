@@ -12,16 +12,17 @@ The computer must first have Google Drive for Desktop installed and signed in to
 4.Create a cloud folder: SecurityAudit Reports
 
 5.If it is a shared folder, add it to “My Drive”
+  Make sure the folder is visible in Windows
 
-6.Make sure the folder is visible in Windows
+6.Example: G:\My Drive\SecurityAudit Reports
 
-7.Example: G:\My Drive\SecurityAudit Reports
+7.Run the installer: Install-SecurityAudit-v4.2.bat
 
-8.Run the installer: Install-SecurityAudit-v4.2.bat
+8.Main program: SecurityAudit.ps1
 
-9.Main program: SecurityAudit.ps1
+9.Local report storage location: C:\SecurityAudit\Date
 
-10.Local report storage location: C:\SecurityAudit\Date
+10.Cloud report upload location: SecurityAudit Reports\ComputerName\Date
 
-11.Cloud report upload location: SecurityAudit Reports\ComputerName\Date
+11..you can tell Chatgpt to analysis the C:\SecurityAudit\Date and report you  cybersecurity thread of the computer
 
